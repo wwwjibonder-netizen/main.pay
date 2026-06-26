@@ -6,42 +6,51 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # একটি নির্দিষ্ট ও স্টেবল উবুন্টু ভার্সন
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # অ্যান্ড্রোয়েড বিল্ডের জন্য প্রয়োজনীয় জাভা এনভায়রনমেন্ট সেটআপ
+    # ১. অ্যান্ড্রোয়েড বিল্ডের জন্য প্রয়োজনীয় জাভা এনভায়রনমেন্ট সেটআপ
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # অ্যান্ড্রোয়েড SDK এবং বিল্ডোজারের জন্য প্রয়োজনীয় লিনাক্স টুলস ইনস্টল করা
-    - name: Install Dependencies
+    # ২. গুগলের সকল অ্যান্ড্রোয়েড SDK লাইসেন্স স্বয়ংক্রিয়ভাবে অ্যাকসেপ্ট করা
+    - name: Accept Android SDK Licenses
+      uses: android-actions/setup-android@v3
+      with:
+        packages: 'tools'
+
+    # ৩. অ্যান্ড্রোয়েড SDK এবং বিল্ডোজারের জন্য প্রয়োজনীয় লিনাক্স টুলস ইনস্টল করা
+    - name: Install System Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake libffi-dev libgomp1
         pip3 install --upgrade pip
         pip3 install buildozer cython virtualenv
 
-    # যদি buildozer.spec ফাইল না থাকে তবে এটি স্বয়ংক্রিয়ভাবে তৈরি করবে
+    # ৪. যদি buildozer.spec ফাইল না থাকে তবে এটি স্বয়ংক্রিয়ভাবে তৈরি ও মডিফাই করা
     - name: Handle Buildozer Spec File
       run: |
         if [ ! -f buildozer.spec ]; then
           buildozer init
-          sed -i 's/title = My Application/title = StudentDB/g' buildozer.spec
-          sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3,kivy/g' buildozer.spec
         fi
+        # অ্যাপের নাম এবং প্রয়োজনীয় রিকোয়ারমেন্টস আপডেট করা
+        sed -i 's/title = My Application/title = StudentDB/g' buildozer.spec
+        sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3,kivy/g' buildozer.spec
+        # লাইসেন্স এরর এড়াতে ডিফল্ট এক্সেপ্ট সেটিংস অ্যাড করা
+        yes | sdkmanager --licenses || true
 
-    # সরাসরি টার্মিনাল কমান্ডের মাধ্যমে APK বিল্ড করা (ডকার ছাড়া)
+    # ৫. সরাসরি টার্মিনাল কমান্ডের মাধ্যমে APK বিল্ড করা
     - name: Build APK with Buildozer
       run: |
-        buildozer -v android debug
+        yes | buildozer -v android debug
 
-    # তৈরি হওয়া APK গিটহাবে আপলোড করা
+    # ৬. তৈরি হওয়া APK গিটহাবে আপলোড করা
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
