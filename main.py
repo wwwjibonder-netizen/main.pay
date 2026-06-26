@@ -1,3 +1,9 @@
+import sys
+import threading
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+import sqlite3
 price_database = {}
 print("item list program")
 print("****************")
@@ -108,4 +114,63 @@ while True:
         print("\nInvalid Choice! Please select between 1-5.")
 
 print("\nprogram closed")
+def your_original_python_code():
+    # উদাহরণ হিসেবে একটি ডামি লুপ দেওয়া হলো, এখানে আপনার আসল কোডটি রিপ্লেস করুন
+    print("====== স্টুডেন্ট ডাটাবেস সিস্টেম ======")
+    print("১. নতুন স্টুডেন্ট যোগ করুন")
+    print("২. সব স্টুডেন্টের তালিকা দেখুন")
+    
+    # আপনার কোডের input() গুলো ঠিক এভাবেই কাজ করবে
+    choice = input("আপনার পছন্দ নির্বাচন করুন: ")
+    print(f"আপনি নির্বাচন করেছেন: {choice}")
+    # ========================================================
+
+# অ্যান্ড্রয়েডে টেক্সট ইনপুট-আউটপুট দেখানোর জন্য টার্মিনাল উইন্ডো মেকানিজম
+class AndroidTerminalWidget(TextInput):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.readonly = True
+        self.background_color = (0, 0, 0, 1) # কালো স্ক্রিন
+        self.foreground_color = (1, 1, 1, 1) # সাদা টেক্সট
+        self.font_name = "Roboto"
+        self.font_size = "16sp"
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, string):
+        self.text += string
+
+    def flush(self):
+        pass
+
+class TerminalApp(App):
+    def build(self):
+        root = BoxLayout(orientation='vertical')
+        
+        # টার্মিনালের ব্ল্যাক স্ক্রিন ডিসপ্লে
+        self.terminal = AndroidTerminalWidget()
+        root.add_widget(self.terminal)
+        
+        # টাইপ করার জন্য নিচের ইনপুট বক্স
+        self.input_box = TextInput(size_hint_y=None, height=50, multiline=False, hint_text="এখানে টাইপ করে এন্টার চাপুন...")
+        self.input_box.bind(on_text_validate=self.on_enter)
+        root.add_widget(self.input_box)
+        
+        # ব্যাকগ্রাউন্ড থ্রেডে আপনার আসল কোডটি রান করানো
+        threading.Thread(target=your_original_python_code, daemon=True).start()
+        
+        return root
+
+    def on_enter(self, instance):
+        user_input = self.input_box.text
+        print(user_input) # স্ক্রিনে ইনপুটটি দেখাবে
+        self.input_box.text = ''
+        # বিল্ট-ইন ইনপুট মেকানিজমে ডেটা পাঠানো
+        sys.stdin.write(user_input + '\n')
+
+if __name__ == '__main__':
+    # অ্যান্ড্রয়েডের জন্য ইনপুট স্ট্রীম প্যাচ
+    import io
+    sys.stdin = io.StringIO()
+    TerminalApp().run()
     
