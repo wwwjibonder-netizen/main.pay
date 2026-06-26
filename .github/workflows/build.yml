@@ -1,21 +1,26 @@
-name: Build APK
-on: [push, pull_request]
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ] # কোন ব্রাঞ্চে পুশ করলে এই বিল্ড রান হবে
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest # কোন অপারেটিং সিস্টেমে রান হবে
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
-        uses: ArtemGovorov/buildozer-action@v1
-        id: buildozer
-        with:
-          workdir: .
-          buildozer_version: stable
+    - name: Setup Node.js # আপনার প্রজেক্ট অনুযায়ী (Node/Python/Java) রানটাইম সেট করুন
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Build
+      run: npm run build
