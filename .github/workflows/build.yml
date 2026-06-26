@@ -1,9 +1,7 @@
-name: Build Android APK
+name: Build Terminal APK
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
     branches: [ "main", "master" ]
 
 jobs:
@@ -14,27 +12,25 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # যদি buildozer.spec ফাইল না থাকে তবে এটি স্বয়ংক্রিয়ভাবে তৈরি করবে
-    - name: Initialize Buildozer Spec (If missing)
-      run: |
-        if [ ! -f buildozer.spec ]; then
-          pip install buildozer
-          buildozer init
-          # অ্যাপের নাম এবং প্রয়োজনীয় লাইব্রেরি (sqlite3) কনফিগার করা
-          sed -i 's/title = My Application/title = StudentDB/g' buildozer.spec
-          sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3/g' buildozer.spec
-        fi
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-    # অফিশিয়াল অ্যাকশন দিয়ে APK বিল্ড করা
     - name: Build APK with Buildozer
       uses: digreatbrian/buildozer-action@v2
       with:
         python-version: '3.10'
-        buildozer-cmd: buildozer -v android debug
+        buildozer-cmd: |
+          pip install --upgrade pip;
+          if [ ! -f buildozer.spec ]; then buildozer init; fi;
+          # এখানে প্রয়োজনীয় ফ্রেমওয়ার্ক প্যাকেজ সেট করা হচ্ছে
+          sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3,kivy/g' buildozer.spec;
+          buildozer -v android debug
 
-    # তৈরি হওয়া APK ডাউনলোডের জন্য আপলোড করা
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Student-Database-APK
+        name: Student-Database-Terminal-APK
         path: ./**/*.apk
