@@ -14,25 +14,25 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # ১. যদি buildozer.spec ফাইল না থাকে তবে এটি স্বয়ংক্রিয়ভাবে তৈরি করবে
+    # যদি buildozer.spec ফাইল না থাকে তবে এটি স্বয়ংক্রিয়ভাবে তৈরি করবে
     - name: Initialize Buildozer Spec (If missing)
       run: |
         if [ ! -f buildozer.spec ]; then
           pip install buildozer
           buildozer init
-          # অ্যাপের নাম এবং রিকোয়ারমেন্টস ডিফল্ট সেট করা হলো
+          # অ্যাপের নাম এবং প্রয়োজনীয় লাইব্রেরি (sqlite3) কনফিগার করা
           sed -i 's/title = My Application/title = StudentDB/g' buildozer.spec
           sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3/g' buildozer.spec
         fi
 
-    # ২. অফিশিয়াল ডকার বেসড অ্যাকশন দিয়ে APK বিল্ড করা
+    # অফিশিয়াল অ্যাকশন দিয়ে APK বিল্ড করা
     - name: Build APK with Buildozer
       uses: digreatbrian/buildozer-action@v2
       with:
         python-version: '3.10'
         buildozer-cmd: buildozer -v android debug
 
-    # ৩. তৈরি হওয়া APK ডাউনলোডের জন্য আপলোড করা
+    # তৈরি হওয়া APK ডাউনলোডের জন্য আপলোড করা
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
