@@ -2,51 +2,35 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        distribution: 'temurin'
-        java-version: '17'
+        python-level: '3.10'
 
-    - name: Accept Android SDK Licenses
-      uses: android-actions/setup-android@v3
-      with:
-        packages: 'tools'
-
-    - name: Install System Dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake libffi-dev libgomp1
-        pip3 install --upgrade pip
-        pip3 install buildozer cython virtualenv
+        sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake libffi-dev libgdbm-dev readline-common libsqlite3-dev bzip2 libbz2-dev
+        pip install --upgrade pip
+        pip install buildozer cython virtualenv
 
-    - name: Generate and Configure Spec File
+    - name: Build with Buildozer
       run: |
-        buildozer init
-        # সমস্ত আধুনিক ও পুরনো অ্যান্ড্রয়েড ফোনের প্রসেসর সাপোর্ট যুক্ত করা
-        sed -i 's/android.archs = armeabi-v7a/android.archs = arm64-v8a, armeabi-v7a/g' buildozer.spec
-        sed -i 's/title = My Application/title = StudentDB/g' buildozer.spec
-        sed -i 's/requirements = python3,kivy/requirements = python3,sqlite3,kivy/g' buildozer.spec
-        # অ্যান্ড্রোয়েড রিকোয়ারমেন্টস মিনিমাম লেভেল সেটআপ
-        sed -i 's/#android.minapi = 21/android.minapi = 21/g' buildozer.spec
-        yes | sdkmanager --licenses || true
+        buildozer android debug
 
-    - name: Build APK with Buildozer
-      run: |
-        yes | buildozer -v android debug
-
-    - name: Upload APK Artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Student-Database-Installable-APK
+        name: Attendance-APK
         path: bin/*.apk
