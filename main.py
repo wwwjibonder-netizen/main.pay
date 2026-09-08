@@ -1,176 +1,100 @@
-import sys
-import threading
+import requests
 from kivy.app import App
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
-import sqlite3
-price_database = {}
-print("item list program")
-print("****************")
 
-# শুরুতে আইটেম যোগ করার অংশ
-try:
-    total_price = int(input("Total number of items to add: "))
-except ValueError:
-    print("ভুল ইনপুট! আইটেম সংখ্যা ০ ধরা হলো।")
-    total_price = 0
+SERVER_URL = "http://127.0.0"
 
-for i in range(1, total_price + 1):
-    print(f"\n {i} enter price inf")
-    name = input("enter name input: ")
-    try:
-        price = int(input("enter price input: "))
-        
-        # ডিসকাউন্ট হিসাব করা
-        if price > 500:
-            discount = price * 0.10
-            final_price = price - discount
-            print(f"10% Discount Price: {final_price}")
-            print("***********")
-            # ডিকশনারিতে নামটিকে Key এবং দামটিকে Value হিসেবে সেভ করা হলো
-            price_database[name] = final_price
-        else:
-            print(f"not discount Regular Price: {price}")
-            print("**********")
-            price_database[name] = price
-    except ValueError:
-        print("ভুল প্রাইস ইনপুট! এই আইটেমটি সেভ করা হয়নি।")
 
-# মেইন মেন্যু লুপ
-while True:
-    print("\n1. exit")
-    print("2. add")
-    print("3. search by price")
-    print("4. all list")
-    print("5. delete price")
-    
-    choice = input("enter your choice: ")
-    
-    if choice == '1':
-        print("enter choice exit")
-        break
-        
-    elif choice == '2':
-        print("\n--- enter add price ---")
-        new_name = input("new item name: ")
-        
-        if new_name in price_database:
-            print("This item already exists in the database!")
-        else:
-            try:
-                new_price = int(input("enter item price: "))
-                if new_price > 500:
-                    new_price = new_price - (new_price * 0.10)
-                    print(f"10% Discount Applied! Price: {new_price}")
-                
-                price_database[new_name] = new_price
-                print(f"Added successfully: {new_name} -> {new_price} Tk")
-            except ValueError:
-                print("ভুল ইনপুট! প্রাইস অবশ্যই সংখ্যা হতে হবে।")
-                
-    elif choice == '3':
-        try:
-            search_price = int(input("enter search price: "))
-            # দাম দিয়ে পণ্য খোঁজার লজিক
-            found_items = [name for name, price in price_database.items() if price == search_price]
-            
-            if found_items:
-                print("\nprice information available:")
-                for item in found_items:
-                    print(f"Product Name: {item} | Price: {search_price} Tk")
-            else:
-                print("\nnot price available")
-        except ValueError:
-            print("ভুল ইনপুট! খোঁজার জন্য সঠিক সংখ্যা লিখুন।")
-            
-    elif choice == '4':
-        if not price_database:
-            print("\ndatabase empty")
-        else:
-            print("\n--- Current Data List ---")
-            for name, price in price_database.items():
-                print(f"Product: {name} -> Price: {price} Tk")
-                
-    elif choice == '5':
-        try:
-            delete_price = int(input("delete price: "))
-            
-            # ডিকশনারির ভ্যালু বা দামের সাথে মিল আছে কিনা দেখা
-            if delete_price in price_database.values():
-                # যে যে পণ্যের দাম মিলে যাবে তাদের নাম খুঁজে বের করা
-                keys_to_delete = [key for key, value in price_database.items() if value == delete_price]
-                
-                # ডিকশনারি থেকে মুছে ফেলা
-                for key in keys_to_delete:
-                    del price_database[key]
-                    
-                print(f"\nconfirm: {delete_price} successfully deleted.")
-            else:
-                print("no data available")
-        except ValueError:
-            print("ভুল ইনপুট! ডিলিট করার জন্য সঠিক সংখ্যা লিখুন (যেমন: cm বা অন্য টেক্সট নয়)।")
-            
-    else:
-        print("\nInvalid Choice! Please select between 1-5.")
+class WorkerAttendanceApp(App):
 
-print("\nprogram closed")
-def your_original_python_code():
-    # উদাহরণ হিসেবে একটি ডামি লুপ দেওয়া হলো, এখানে আপনার আসল কোডটি রিপ্লেস করুন
-    print("====== স্টুডেন্ট ডাটাবেস সিস্টেম ======")
-    print("১. নতুন স্টুডেন্ট যোগ করুন")
-    print("২. সব স্টুডেন্টের তালিকা দেখুন")
-    
-    # আপনার কোডের input() গুলো ঠিক এভাবেই কাজ করবে
-    choice = input("আপনার পছন্দ নির্বাচন করুন: ")
-    print(f"আপনি নির্বাচন করেছেন: {choice}")
-    # ========================================================
-
-# অ্যান্ড্রয়েডে টেক্সট ইনপুট-আউটপুট দেখানোর জন্য টার্মিনাল উইন্ডো মেকানিজম
-class AndroidTerminalWidget(TextInput):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.readonly = True
-        self.background_color = (0, 0, 0, 1) # কালো স্ক্রিন
-        self.foreground_color = (1, 1, 1, 1) # সাদা টেক্সট
-        self.font_name = "Roboto"
-        self.font_size = "16sp"
-        sys.stdout = self
-        sys.stderr = self
-
-    def write(self, string):
-        self.text += string
-
-    def flush(self):
-        pass
-
-class TerminalApp(App):
     def build(self):
-        root = BoxLayout(orientation='vertical')
-        
-        # টার্মিনালের ব্ল্যাক স্ক্রিন ডিসপ্লে
-        self.terminal = AndroidTerminalWidget()
-        root.add_widget(self.terminal)
-        
-        # টাইপ করার জন্য নিচের ইনপুট বক্স
-        self.input_box = TextInput(size_hint_y=None, height=50, multiline=False, hint_text="এখানে টাইপ করে এন্টার চাপুন...")
-        self.input_box.bind(on_text_validate=self.on_enter)
-        root.add_widget(self.input_box)
-        
-        # ব্যাকগ্রাউন্ড থ্রেডে আপনার আসল কোডটি রান করানো
-        threading.Thread(target=your_original_python_code, daemon=True).start()
-        
-        return root
+        self.title = "হাজিরা অ্যাপ"
 
-    def on_enter(self, instance):
-        user_input = self.input_box.text
-        print(user_input) # স্ক্রিনে ইনপুটটি দেখাবে
-        self.input_box.text = ''
-        # বিল্ট-ইন ইনপুট মেকানিজমে ডেটা পাঠানো
-        sys.stdin.write(user_input + '\n')
+        # ১. মূল লেআউট (এটি পুরো স্ক্রিনকে মাঝখানে ধরে রাখবে)
+        root_layout = AnchorLayout(anchor_x="center", anchor_y="center")
 
-if __name__ == '__main__':
-    # অ্যান্ড্রয়েডের জন্য ইনপুট স্ট্রীম প্যাচ
-    import io
-    sys.stdin = io.StringIO()
-    TerminalApp().run()
-    
+        # ২. ভেতরের ছোট অ্যাপ বক্স (এটি পুরো স্ক্রিনের ৮০% চওড়া এবং ৫০% লম্বা হবে)
+        app_box = BoxLayout(
+            orientation="vertical",
+            padding=20,
+            spacing=15,
+            size_hint=(0.8, 0.5),  # সাইজ ছোট করার মূল কোড
+        )
+
+        # ৩. স্ট্যাটাস লেবেল
+        self.status_label = Label(
+            text="আইডি লিখে নিচের বাটনে চাপুন",
+            font_size="18sp",
+            bold=True,
+            halign="center",
+            valign="middle",
+            size_hint=(1, 0.3),
+        )
+        self.status_label.bind(size=self.status_label.setter("text_size"))
+        app_box.add_widget(self.status_label)
+
+        # ৪. শ্রমিকের আইডি ইনপুট বক্স
+        self.worker_id_input = TextInput(
+            hint_text="এখানে শ্রমিকের আইডি লিখুন",
+            font_size="16sp",
+            multiline=False,
+            size_hint=(1, 0.25),
+            input_filter="int",
+        )
+        app_box.add_widget(self.worker_id_input)
+
+        # ৫. ফিঙ্গারপ্রিন্ট বাটন
+        fingerprint_btn = Button(
+            text="👍 আঙুলের ছাপ দিন",
+            font_size="18sp",
+            bold=True,
+            background_color=(0.1, 0.6, 0.3, 1),
+            size_hint=(1, 0.45),
+        )
+        fingerprint_btn.bind(on_press=self.scan_fingerprint_and_send)
+        app_box.add_widget(fingerprint_btn)
+
+        # ছোট বক্সটিকে মূল স্ক্রিনের মাঝখানে যুক্ত করা
+        root_layout.add_widget(app_box)
+        return root_layout
+
+    def scan_fingerprint_and_send(self, instance):
+        worker_id = self.worker_id_input.text.strip()
+
+        if not worker_id:
+            self.status_label.text = "⚠️ প্রথমে আইডি লিখুন!"
+            return
+
+        self.status_label.text = "🔄 যাচাই করা হচ্ছে..."
+
+        current_lat = 23.8103
+        current_lon = 90.4125
+
+        payload = {
+            "worker_id": worker_id,
+            "latitude": current_lat,
+            "longitude": current_lon,
+        }
+
+        try:
+            response = requests.post(SERVER_URL, json=payload, timeout=5)
+            result = response.json()
+
+            if response.status_code == 200:
+                self.status_label.text = f"✅ {result['message']}"
+                self.worker_id_input.text = ""
+            else:
+                self.status_label.text = f"❌ {result['message']}"
+
+        except requests.exceptions.ConnectionError:
+            self.status_label.text = "⚠️ সার্ভার বন্ধ আছে!"
+        except Exception as e:
+            self.status_label.text = f"⚠️ ভুল: {str(e)}"
+
+
+if __name__ == "__main__":
+    WorkerAttendanceApp().run()
