@@ -8,31 +8,25 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Get Date
-      id: get-date
-      run: |
-        echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
     - name: Cache Buildozer global directory
       uses: actions/cache@v3
       with:
         path: ~/.buildozer
-        key: buildozer-global-${{ runner.os }}-${{ steps.get-date.outputs.date }}
-
-    - name: Cache Buildozer .buildozer directory
-      uses: actions/cache@v3
-      with:
-        path: .buildozer
-        key: buildozer-local-${{ runner.os }}-${{ steps.get-date.outputs.date }}
+        key: buildozer-global-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
     - name: Build with Buildozer
-      uses: ArtemGovorov/buildozer-action@v1
+      uses: ArtemSBulgakov/buildozer-action@v1
       with:
         command: buildozer android debug
         repository_root: .
