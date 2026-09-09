@@ -1,0 +1,44 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+    - name: Cache Buildozer global directory
+      uses: actions/cache@v3
+      with:
+        path: ~/.buildozer
+        key: buildozer-global-${{ runner.os }}-${{ steps.get-date.outputs.date }}
+
+    - name: Cache Buildozer .buildozer directory
+      uses: actions/cache@v3
+      with:
+        path: .buildozer
+        key: buildozer-local-${{ runner.os }}-${{ steps.get-date.outputs.date }}
+
+    - name: Build with Buildozer
+      uses: ArtemGovorov/buildozer-action@v1
+      with:
+        command: buildozer android debug
+        repository_root: .
+
+    - name: Upload APK Artifact
+      uses: actions/artifacts@v4
+      with:
+        name: Attendance-App-Debug
+        path: bin/*.apk
