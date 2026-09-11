@@ -1,0 +1,6 @@
+android:
+  permissions:
+    - android.permission.CAMERA
+    - android.permission.INTERNET
+  package_name: com.attendance.qrscanner
+  version_name: 1.0.0
