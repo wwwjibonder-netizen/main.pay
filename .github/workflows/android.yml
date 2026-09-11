@@ -19,12 +19,13 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Build APK with Buildozer Action
-      # ভাঙা প্যাকেজের এরর সম্পূর্ণ এড়াতে এই নির্দিষ্ট অ্যাকশন রানার ব্যবহার করা হয়েছে
-      uses: Actionbravo/buildozer-action@v1.2
+    - name: Build APK with Official Buildozer Action
+      uses: ArtemSBulgakov/buildozer-action@v1
+      id: buildozer
       with:
-        command: buildozer android debug
-        repository_root: .
+        # বিল্ড শুরুর আগে Cython ও অন্যান্য টুলস প্রিপেয়ার করার জন্য কমান্ড কম্বিনেশন
+        command: pip3 install --user --upgrade Cython==0.29.36 virtualenv setuptools; buildozer android debug
+        buildozer_version: master
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
