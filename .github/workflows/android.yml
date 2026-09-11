@@ -22,18 +22,23 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libssl-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libpango1.0-dev libgl1-mesa-dev openjdk-17-jdk-headless unzip pkg-config autoconf libtool libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev python3-setuptools
+        sudo apt-get install -y libssl-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libpango1.0-dev libgl1-mesa-dev openjdk-17-jdk-headless unzip pkg-config autoconf libtool libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev python3-setuptools build-essential libstdc++6 aidl
 
     - name: Install Python Dependencies
       run: |
         pip install --upgrade pip
         pip install buildozer cython==0.29.33 setuptools
 
+    - name: Auto-Accept Android SDK Licenses (Fixes AIDL Error)
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo -e "\n8933bad161ad5c7865a31ceed987d72d11d0441d\n24333f8a63b6825ea5c551f4a835c794fe9d1522\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+
     - name: Build with Buildozer
       run: |
         buildozer android debug
       env:
-        # গিটহাব অ্যাকশনে রুট ইউজার হিসেবে বিল্ড করার পারমিশন
         BUILDOZER_WARN_ON_ROOT: 1
 
     - name: Upload APK Artifact
