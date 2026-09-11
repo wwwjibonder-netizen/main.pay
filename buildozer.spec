@@ -1,16 +1,20 @@
 [app]
-title = Attendance App
-package.name = attendanceapp
-package.domain = org.test
+title = QR Face Attendance
+package.name = qroutandface
+package.domain = org.yourname
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,spec
 version = 0.1
-requirements = python3,kivy,requests,urllib3
-
+requirements = python3,kivy,opencv-python,pyzbar,requests,jpeg,png
 orientation = portrait
+osx.kivy_version = 2.1.0
 fullscreen = 0
-android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = True
+android.permissions = CAMERA, INTERNET
+android.api = 33
+android.minapi = 21
+android.ndk_api = 21
+android.archs = armeabi-v7a, arm64-v8a
+p4a.branch = master
 
 [buildozer]
 log_level = 2
