@@ -28,10 +28,8 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Install System and Python Dependencies
+    - name: Install Python Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libssl-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly libgstreamer-plugins-base1.0-dev libpango1.0-dev libgl1-mesa-dev unzip pkg-config autoconf libtool libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev python3-setuptools build-essential libstdc++6
         pip install --upgrade pip
         pip install buildozer cython==0.29.36 setuptools virtualenv
 
@@ -41,9 +39,3 @@ jobs:
       env:
         ANDROID_HOME: ${{ env.ANDROID_HOME }}
         ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Android-APK
-        path: bin/*.apk
