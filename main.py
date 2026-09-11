@@ -1,8 +1,9 @@
+
 import flet as ft
 import requests
 
 # ⚠️ মনোযোগ দিন: নিচের লাইনে YOUR_SUBDOMAIN কেটে আপনার PythonAnywhere-এর লিঙ্কটি বসিয়ে দিন
-SERVER_URL = "https://YOUR_://pythonanywhere.com" 
+SERVER_URL = "https://www.pythonanywhere.com/user/jibonder/" 
 
 def main(page: ft.Page):
     page.title = "QR Attendance System"
