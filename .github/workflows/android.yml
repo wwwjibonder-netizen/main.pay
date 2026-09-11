@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -19,26 +19,12 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install System Dependencies
-      run: |
-        sudo apt-get update
-        # ভেঙে যাওয়া প্যাকেজ এড়াতে aidl ম্যানুয়ালি ইনস্টল না করে বিল্ডোজারকে অটো ডাউনলোড করতে দেওয়া হলো
-        sudo apt-get install -y libssl-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libpango1.0-dev libgl1-mesa-dev openjdk-17-jdk-headless unzip pkg-config autoconf libtool libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev python3-setuptools build-essential libstdc++6
-
-    - name: Install Buildozer and Cython
-      run: |
-        pip install --upgrade pip
-        pip install buildozer cython==0.29.36 setuptools
-
-    - name: Auto-Accept Android SDK Licenses
-      run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n8933bad161ad5c7865a31ceed987d72d11d0441d\n24333f8a63b6825ea5c551f4a835c794fe9d1522\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-
-    - name: Build Android APK with Buildozer
-      run: |
-        # পাইপলাইনের মাধ্যমে আগেই 'yes' কমান্ড ইনপুট দিয়ে দেওয়া হলো যাতে রুট ইউজার প্রম্পট [y/n] অটো স্কিপ হয়ে যায়
-        yes | buildozer android debug
+    - name: Build APK with Buildozer Action
+      # ভাঙা প্যাকেজের এরর সম্পূর্ণ এড়াতে এই নির্দিষ্ট অ্যাকশন রানার ব্যবহার করা হয়েছে
+      uses: Actionbravo/buildozer-action@v1.2
+      with:
+        command: buildozer android debug
+        repository_root: .
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
