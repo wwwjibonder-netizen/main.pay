@@ -8,32 +8,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
+    # ভাঙা প্যাকেজের ঝামেলা এড়াতে অফিসিয়াল Kivy ডকার কন্টেইনার ব্যবহার
+    container:
+      image: kivy/buildozer:latest
+      options: --user root
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install System Dependencies
+    - name: Set up Workspace Ownership
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libssl-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libpango1.0-dev libgl1-mesa-dev openjdk-17-jdk-headless unzip pkg-config autoconf libtool libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev python3-setuptools build-essential libstdc++6 aidl
+        git config --global --add safe.directory /__w/qr-attendance-project/qr-attendance-project
+        git config --global --add safe.directory '*'
 
-    - name: Install Python Dependencies
-      run: |
-        pip install --upgrade pip
-        pip install buildozer cython==0.29.33 setuptools
-
-    - name: Auto-Accept Android SDK Licenses
+    - name: Pre-accept Android SDK Licenses
       run: |
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
         echo -e "\n8933bad161ad5c7865a31ceed987d72d11d0441d\n24333f8a63b6825ea5c551f4a835c794fe9d1522\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
     - name: Build Android APK with Buildozer
       run: |
