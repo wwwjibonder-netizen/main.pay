@@ -19,13 +19,26 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Build APK with Official Buildozer Action
-      uses: ArtemSBulgakov/buildozer-action@v1
-      id: buildozer
-      with:
-        # বিল্ড শুরুর আগে Cython ও অন্যান্য টুলস প্রিপেয়ার করার জন্য কমান্ড কম্বিনেশন
-        command: pip3 install --user --upgrade Cython==0.29.36 virtualenv setuptools; buildozer android debug
-        buildozer_version: master
+    - name: Clear apt cache and setup base tools
+      run: |
+        sudo apt-get clean
+        sudo apt-get update
+        sudo apt-get install -y zip unzip openjdk-17-jdk-headless autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev libffi-dev
+
+    - name: Install Buildozer & Fixed Cython
+      run: |
+        pip install --upgrade pip
+        pip install buildozer cython==0.29.36 setuptools virtualenv
+
+    - name: Pre-accept Android SDK Licenses
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo -e "\n8933bad161ad5c7865a31ceed987d72d11d0441d\n24333f8a63b6825ea5c551f4a835c794fe9d1522\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
+    - name: Build Android APK with Buildozer
+      run: |
+        # 'yes' পাইপলাইন দিয়ে রুট ইউজার এবং কনফার্মেশন প্রম্পট [y/n] অটো বাইপাস করা হলো
+        yes | buildozer android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
