@@ -25,17 +25,27 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-
-    - name: Install Python Dependencies
+    - name: Install Tools & Dependencies
       run: |
+        sudo apt-get update
+        # শুধু কোড কম্পাইল করার বেসিক লাইব্রেরি ইনস্টল (কোনো কনফ্লিক্টিং মিডিয়া প্যাকেজ নেই)
+        sudo apt-get install -y zip unzip openjdk-17-jdk-headless autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev libffi-dev build-essential libstdc++6
         pip install --upgrade pip
         pip install buildozer cython==0.29.36 setuptools virtualenv
 
+    - name: Pre-accept Android SDK Licenses
+      run: |
+        # বিল্ডোজারের নিজস্ব পাথে গুগলের লাইসেন্স কি আগে থেকেই ইনজেক্ট করে দেওয়া হলো
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo -e "\n8933bad161ad5c7865a31ceed987d72d11d0441d\n24333f8a63b6825ea5c551f4a835c794fe9d1522\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
     - name: Build Android APK with Buildozer
       run: |
-        buildozer android debug
-      env:
-        ANDROID_HOME: ${{ env.ANDROID_HOME }}
-        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+        # yes ব্যবহার করে রুট প্রোম্পট বাইপাস করা হলো
+        yes | buildozer android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Android-APK
+        path: bin/*.apk
