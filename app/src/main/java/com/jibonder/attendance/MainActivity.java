@@ -21,7 +21,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         try {
             webView = new WebView(this);
             setContentView(webView);
@@ -29,26 +28,23 @@ public class MainActivity extends Activity {
             WebSettings s = webView.getSettings();
             s.setJavaScriptEnabled(true);
             s.setDomStorageEnabled(true);
-            s.setDatabaseEnabled(true);
             s.setMediaPlaybackRequiresUserGesture(false);
             s.setAllowFileAccess(true);
-            s.setAllowContentAccess(true);
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
-            s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
             webView.setWebViewClient(new WebViewClient());
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onPermissionRequest(final PermissionRequest request) {
                     runOnUiThread(new Runnable() {
-                        @Override
                         public void run() {
                             if (checkSelfPermission(Manifest.permission.CAMERA)
                                     == PackageManager.PERMISSION_GRANTED) {
                                 request.grant(request.getResources());
                             } else {
                                 pendingRequest = request;
-                                requestPermissions(new String[]{Manifest.permission.CAMERA}, REQ);
+                                requestPermissions(
+                                    new String[]{Manifest.permission.CAMERA}, REQ);
                             }
                         }
                     });
@@ -67,7 +63,8 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
         if (requestCode == REQ && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                 && pendingRequest != null) {
