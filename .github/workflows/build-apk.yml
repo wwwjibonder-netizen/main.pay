@@ -20,21 +20,24 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Gradle
+      - name: Install Gradle 8.5
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q gradle-8.5-bin.zip
-          echo "$GITHUB_WORKSPACE/gradle-8.5/bin" >> $GITHUB_PATH
+          curl -sL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "/tmp/gradle-8.5/bin" >> $GITHUB_PATH
 
-      - name: Generate wrapper and build
+      - name: List project files
+        run: find . -type f | head -50
+
+      - name: Create wrapper and build
         run: |
           gradle wrapper --gradle-version 8.5
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace --info 2>&1 | tail -100
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: attendance-apk
           path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
