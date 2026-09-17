@@ -20,13 +20,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Grant execute permission for gradlew
+      - name: Install Gradle
         run: |
-          gradle wrapper --gradle-version 8.2 || true
+          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          echo "$GITHUB_WORKSPACE/gradle-8.5/bin" >> $GITHUB_PATH
 
-      - name: Build Debug APK
+      - name: Generate wrapper and build
         run: |
-          gradle wrapper --gradle-version 8.2
+          gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
@@ -34,3 +37,4 @@ jobs:
         with:
           name: attendance-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
